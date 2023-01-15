@@ -13,7 +13,6 @@ import Data.Text
 import Data.Time
 import Data.Vector
 import GHC.Generics
-import Protolude (on)
 
 data Gender = Male | Female deriving (Eq, Generic, Show)
 
