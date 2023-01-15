@@ -24,6 +24,11 @@ dependencies:
 - protolude
 - text
 - containers
+- cassava
+- time
+- bytestring
+- vector
+- foldl
 
 ghc-options:
 - -Wall
