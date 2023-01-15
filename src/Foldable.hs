@@ -1,6 +1,6 @@
 module Foldable where
 import Data.Monoid
-import Data.Foldable()
+import Data.Foldable(sequenceA_)
 import GHC.Base()
 import Data.Semigroup ( Max(Max, getMax), Min(Min, getMin) )
 
@@ -88,5 +88,8 @@ find' p = getFirst . foldMap (\x -> First (if p x then Just x else Nothing))
 -- 9. Implement traverse_ in terms of sequenceA_ and vice versa. One of these will need an 
 --    extra constraint. What is it?
 
--- traverse_' :: (Applicative f, Foldable t) => (a -> f b) -> t a -> f ()
--- traverse_' f xs = 
+traverse_' :: (Functor t, Applicative f, Foldable t) => (a -> f b) -> t a -> f ()
+traverse_' f xs = sequenceA_ $ f <$> xs
+
+sequenceA_' :: (Applicative f, Traversable t) => t (f a) -> f ()
+sequenceA_' = traverse_' id
