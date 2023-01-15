@@ -1,2 +1,1 @@
 # haskex
-Haskell exercises
