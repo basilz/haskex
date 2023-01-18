@@ -44,14 +44,13 @@ readCsvFile fp = do
 stats :: Foldl.Fold Person Stats
 stats = Foldl.Fold step begin done
   where
-    begin = Stats 0 0 Nothing
-    step (Stats _ _ Nothing)  p@(Person _ Female _) = Stats 1 0 (Just p)
-    step (Stats _ _ Nothing)  p@(Person _ Male _)   = Stats 0 1 (Just p)
-    step (Stats f m (Just o)) p@(Person _ Female _) = Stats (f + 1) m (oldestByDob o p)
-    step (Stats f m (Just o)) p@(Person _ Male _)   = Stats f (m + 1) (oldestByDob o p)
-    done s = s
+    begin = (0, 0, Nothing)
+    step (_, _, Nothing) p@(Person _ Female _) = (1, 0, Just p)
+    step (_, _, Nothing) p@(Person _ Male _) = (0, 1, Just p)
+    step (f, m, Just o) p@(Person _ Female _) = (f + 1, m, oldestByDob o p)
+    step (f, m, Just o) p@(Person _ Male _) = (f, m + 1, oldestByDob o p)
+    done (f, m, db) = Stats f m db
     oldestByDob p1 p2 = if dob p1 < dob p2 then Just p1 else Just p2
-
 
 main :: FilePath -> IO ()
 main fp = readCsvFile fp >>= print . Foldl.fold stats
