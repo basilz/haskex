@@ -3,7 +3,14 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    hackage: foldl-1.4.13@sha256:d104a02fe50c60ff73be6225d7cf59209aebd044b3280ed39e097be9656f7272,2714
+    pantry-tree:
+      size: 1029
+      sha256: 6f00df2402654b9fad70b00ac3c195a56308fa2d11da611c67224b9f5cc19498
+  original:
+    hackage: foldl-1.4.13
 snapshots:
 - completed:
     size: 586069

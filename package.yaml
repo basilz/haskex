@@ -23,14 +23,20 @@ dependencies:
 - base >= 4.7 && < 5
 - protolude
 - text
+- text-show
 - containers
 - cassava
 - time
 - bytestring
 - vector
-- foldl
+- foldl >= 1.4.13
 - comonad
 - attoparsec
+- parsec
+- mtl
+- hspec
+- transformers
+- unix
 
 ghc-options:
 - -Wall
@@ -59,8 +65,7 @@ executables:
 
 tests:
   haskex-test:
-    main:                Spec.hs
-    source-dirs:         test
+    defaults: hspec/hspec@main
     ghc-options:
     - -threaded
     - -rtsopts

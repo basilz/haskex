@@ -24,7 +24,7 @@ import qualified Control.Comonad as F
 
 data Gender = Male | Female deriving (Eq, Generic, Show)
 
-data Person = Person {name :: !Text, gender :: !Gender, dob :: !Day}
+data Person = Person {name :: Text, gender :: Gender, dob :: Day}
   deriving (Generic, Show)
 
 data Stats = Stats {femaleNum :: Int, maleNum :: Int, oldestPerson :: Maybe Text}
@@ -93,6 +93,7 @@ main :: FilePath -> IO ()
 main fp = do 
   v1 <- readCsvFile fp
   let suspend = F.fold (F.duplicate stats) v1
+  print (F.extract suspend)
   v2 <- readCsvFile fp
   let final = F.fold suspend v2
   assert (oldestPerson final == oldestPerson (extract suspend)) $ print final

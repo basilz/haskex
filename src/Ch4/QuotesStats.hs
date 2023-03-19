@@ -59,11 +59,3 @@ slidingWindow l = makeScan (1, []) $ \x (n, xs) ->
   let xs' = take l $ x : xs
       r = if n >= l then Just xs' else Nothing
    in (r, (n + 1, xs'))
-
-slidingWindow' :: Int -> S.Scan a (Maybe [a])
-slidingWindow' l = S.Scan (state . f) (1, [])
-  where
-    f x (n, xs) =
-      let xs' = take l $ x : xs
-          r = if n >= l then Just xs' else Nothing
-       in (r, (n + 1, xs'))
