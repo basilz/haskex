@@ -1,4 +1,4 @@
-module Ch5.FormulasParserSpec (spec) where
+module Ch5.FormulasParserSpec where
 
 import Test.Hspec
 import Text.Parsec

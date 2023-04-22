@@ -98,6 +98,8 @@ test-suite haskex-test
   main-is: Spec.hs
   other-modules:
       Ch5.FormulasParserSpec
+      Ch6.TestMiniSpec
+      Main
       Paths_haskex
   hs-source-dirs:
       test
@@ -111,7 +113,7 @@ test-suite haskex-test
     , containers
     , foldl >=1.4.13
     , haskex
-    , hspec ==2.*
+    , hspec
     , mtl
     , parsec
     , protolude

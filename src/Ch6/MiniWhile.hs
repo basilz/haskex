@@ -1,6 +1,5 @@
-module Ch6.MiniWhile where
+module Ch6.MiniWhile(main, parseEval, program) where
 
-import Control.Comonad.Identity (Identity)
 import Control.Monad.Except (ExceptT, runExceptT, throwError)
 import Control.Monad.State
 import Data.Functor (($>))
@@ -9,6 +8,7 @@ import qualified Data.Map as M
 import qualified Text.Parsec.Token as Token
 import Text.ParserCombinators.Parsec
 import Text.ParserCombinators.Parsec.Language (emptyDef)
+import Test.Hspec
 
 newtype Program = Program [Stmt] deriving (Show, Eq)
 
@@ -60,7 +60,6 @@ languageDef =
           "else",
           "while",
           "do",
-          "skip",
           "true",
           "false",
           "not",
@@ -172,19 +171,22 @@ program = do
 
 type Env = M.Map Id Integer
 
-data EvalError = VariableNotDefined | IntegerInBoolean | SyntaxError deriving (Show)
+data EvalError = 
+  ParseError ParseError
+  | VariableNotDefined 
+  | IntegerInBoolean 
+  | BooleanInInteger deriving (Eq, Show)
 
-type Evaluator = ExceptT EvalError (StateT Env Identity)
+type Evaluator = ExceptT EvalError (StateT Env IO)
 
-evalStmt :: Stmt -> Evaluator Env
+evalStmt :: Stmt -> Evaluator ()
 evalStmt (Asgn i e) = do
-  env <- evalExp e
-  modify $ M.insert i env
-  get
+  x <- evalExp e
+  modify $ M.insert i x
 evalStmt w@(While prop stmts) = do
   mapM_ evalStmt stmts
   propTrue <- evalProp prop
-  if propTrue then evalStmt w else get
+  when propTrue $ evalStmt w
 
 evalProp :: Exp -> Evaluator Bool
 evalProp (Cmp op e1 e2) = do
@@ -198,14 +200,14 @@ evalProp (Cmp op e1 e2) = do
 evalProp (Not prop) = do
   p <- evalProp prop
   return $ not p
-evalProp _ = throwError SyntaxError
+evalProp _ = throwError IntegerInBoolean
 
 evalExp :: Exp -> Evaluator Integer
 evalExp (If prop e1 e2) = do
   propTrue <- evalProp prop
   if propTrue then evalExp e1 else evalExp e2
 evalExp (Aexp e) = evalAexp e
-evalExp _ = throwError SyntaxError
+evalExp _ = throwError BooleanInInteger
 
 evalAexp :: Aexp -> Evaluator Integer
 evalAexp (Num x) = return x
@@ -225,19 +227,32 @@ evalAexp (Brk op ae1 ae2) = do
     TSub -> return $ x - y
 
 eval :: Program -> Evaluator Env
-eval (Program stmts) = do
+eval p@(Program stmts) = do
+  liftIO $ print p
   mapM_ evalStmt stmts
   get
 
+parseEval :: String -> IO (Either EvalError Env)
+parseEval s = 
+  let x = parse program "" s
+  in case x of
+    Left parseError -> return $ Left (ParseError parseError)
+    Right prg -> do
+      (e, _) <- runStateT (runExceptT (eval prg)) M.empty
+      case e of
+        err@(Left _) -> return err
+        Right env -> return $ Right env
+
+-- main :: IO ()
+-- main = do 
+--   x <- parseEval "x:= 0; y:= 5;while x <= 3 do y:= (y * 5); x:= (x + 1) done; y:= if y > 10000 then 10000 else y fi"
+--   case x of
+--     Left ee -> print ee
+--     Right env -> print env
+
 main :: IO ()
-main = do
-  let x =
-        parse
-          program
-          ""
-          "x:= 0; y:= 5;while x <= 4 do y:= (y * 5); x:= (x + 1) done; y:= if y > 10000 then 10000 else y fi"
-  case x of
-    Left pe -> print pe
-    Right st -> do
-      print st
-      print $ runStateT (runExceptT (eval st)) M.empty
+main = hspec $ do 
+  describe "x := 3" $ do
+    it "should be evaluated as" $ do
+      parsed <- parseEval "x := 3"
+      parsed `shouldBe` Right (M.singleton "x" 3)
